@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gjenerues Faturash — Stiven Catalyst Coaching</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="brandbar no-print">
+  <h1>Gjenerues Faturash — Stiven Catalyst Coaching</h1>
+  <p>Plotëso klientin, zgjidh shërbimin nga lista me një klik dhe TVSH-ja llogaritet automatikisht. Fatura djathtas printohet sipas modelit tënd.</p>
+</div>
+
+<div class="app">
+  <div class="panel no-print">
+    <details id="det-company">
+      <summary>Të dhënat e kompanisë (faturuesi)</summary>
+      <label>Emri i kompanisë</label><input type="text" id="c-name">
+      <label>Adresa</label><input type="text" id="c-address">
+      <div class="row2"><div><label>Telefoni</label><input type="text" id="c-phone"></div><div><label>NIPT</label><input type="text" id="c-nipt"></div></div>
+      <div class="row2"><div><label>Email</label><input type="text" id="c-email"></div><div><label>Website</label><input type="text" id="c-website"></div></div>
+      <div class="row2"><div><label>Banka</label><input type="text" id="c-bank"></div><div><label>TVSH %</label><input type="number" id="c-vat" min="0" max="100" step="0.5"></div></div>
+      <label>IBAN</label><input type="text" id="c-iban">
+      <div class="row2"><div><label>Nënshkruesi (emri)</label><input type="text" id="c-admin"></div><div><label>Titulli</label><input type="text" id="c-admintitle"></div></div>
+      <label>Shënim rreshti 1 (poshtë faturës)</label><input type="text" id="c-note1">
+      <label>Shënim rreshti 2</label><input type="text" id="c-note2">
+      <label style="margin-top:14px;">Logo</label><div class="fileline"><img id="logo-preview" src="" alt="logo"><input type="file" accept="image/*" id="f-logo"><button class="btn small" onclick="App.resetImg('logo')">Rikthe origjinalin</button></div>
+      <label>Nënshkrimi</label><div class="fileline"><img id="sig-preview" src="" alt="nënshkrim"><input type="file" accept="image/*" id="f-sig"><button class="btn small" onclick="App.resetImg('signature')">Rikthe origjinalin</button></div>
+      <label>Vula</label><div class="fileline"><img class="stampimg" id="stamp-preview" src="" alt="vula"><input type="file" accept="image/*" id="f-stamp"><button class="btn small" onclick="App.resetImg('stamp')">Rikthe origjinalin</button></div>
+      <p class="hint">Logoja/nënshkrimi/vula fillestare janë marrë nga fatura jote e mëparshme (foto) — cilësia është e kufizuar. Ngarko skedarë PNG më të pastër këtu kur t'i kesh, dhe do zëvendësohen menjëherë.</p>
+      <div class="btn-row"><button class="btn primary" onclick="App.saveCompany()">Ruaj të dhënat e kompanisë</button></div>
+    </details>
+
+    <details id="det-client" open>
+      <summary>Klienti</summary>
+      <label>Emri i klientit</label><input type="text" id="cl-name" oninput="App.onClientChange()">
+      <div class="row2"><div><label>NIPT i klientit</label><input type="text" id="cl-nipt" oninput="App.onClientChange()"></div><div><label>Monedha</label><select id="m-currency" onchange="App.onMetaChange()"><option>ALL</option><option>EUR</option><option>USD</option></select></div></div>
+      <label>Adresa e klientit</label><input type="text" id="cl-address" oninput="App.onClientChange()"><div id="recent-clients" class="chips"></div>
+    </details>
+
+    <details id="det-services" open>
+      <summary>Shërbimet</summary>
+      <label style="margin-top:0;">Zgjidh shërbimin - kliko vetëm një herë për ta shtuar në faturë</label>
+      <div class="service-help">Të gjitha shërbimet dhe çmimet pa TVSH janë të listuara më poshtë. Nuk ke nevojë të shkruash asgjë: kliko shërbimin dhe ai futet automatikisht në faturë.</div>
+      <div id="catalog-chips"></div>
+      <details class="service-manage"><summary>Menaxho listën e shërbimeve (opsionale)</summary><div class="addservice"><input type="text" id="new-svc-name" placeholder="Emri i shërbimit të ri"><input type="number" id="new-svc-price" placeholder="Çmimi pa TVSH" min="0" step="1"><button class="btn" onclick="App.addCatalogService()">+ Shto</button></div></details>
+      <label style="margin-top:16px;">Shërbimet e zgjedhura në faturë</label>
+      <table class="items" id="items-table"><thead><tr><th style="width:16px;">Nr</th><th>Përshkrimi</th><th style="width:52px;">Sasia</th><th style="width:96px;">Çmimi (pa TVSH)</th><th style="width:80px;">Vlera</th><th></th></tr></thead><tbody id="items-body"></tbody></table>
+      <div class="totals-mini" id="totals-mini"></div>
+    </details>
+
+    <details id="det-meta" open><summary>Të dhënat e faturës</summary><div class="row2"><div><label>Nr. Faturës</label><input type="text" id="m-number" oninput="App.onMetaChange()"></div><div><label>Data</label><input type="date" id="m-date" oninput="App.onMetaChange()"></div></div></details>
+
+    <div class="btn-row" style="margin-top:14px;"><button class="btn primary block" onclick="window.print()">🖨️ Printo / Ruaj si PDF</button></div>
+    <div class="btn-row"><button class="btn block" onclick="App.saveInvoice()">💾 Ruaj faturën në histori</button></div>
+    <div class="btn-row"><button class="btn block" onclick="App.newInvoice()">🔄 Faturë e re</button></div>
+
+    <details id="det-history"><summary>Faturat e fundit</summary><div id="history-list"></div><div class="btn-row"><button class="btn small" onclick="App.exportBackup()">⬇️ Eksporto rezervë (JSON)</button><label class="btn small" style="cursor:pointer;">⬆️ Importo<input type="file" accept="application/json" id="f-import" style="display:none" onchange="App.importBackup(event)"></label></div><p class="hint">Gjithçka ruhet vetëm në këtë shfletues/pajisje — asgjë nuk dërgohet në internet. Eksporto rezervë herë pas here.</p></details>
+  </div>
+
+  <div class="preview-wrap"><div class="invoice-sheet" id="invoiceSheet"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="assets.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
